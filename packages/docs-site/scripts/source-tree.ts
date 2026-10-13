@@ -94,11 +94,21 @@ export class SourceTree {
     const info = await lstat(absolute).catch(() => undefined);
     if (!info?.isDirectory()) return [];
     await this.assertInside(absolute, relativeDirectory);
+    // Walk explicitly instead of `readdir({ recursive: true })`: on Node 26 it follows
+    // symlinked directories, which could escape the checkout. Non-recursive `readdir` entries
+    // describe the link itself, so symlinks are neither files nor directories here.
     const files: string[] = [];
-    for (const entry of await readdir(absolute, { withFileTypes: true, recursive: true })) {
-      if (!entry.isFile()) continue;
-      const relative = path.relative(this.root, path.join(entry.parentPath, entry.name)).split(path.sep).join('/');
-      if (include(relative)) files.push(relative);
+    const pending = [absolute];
+    for (let directory = pending.pop(); directory !== undefined; directory = pending.pop()) {
+      for (const entry of await readdir(directory, { withFileTypes: true })) {
+        const entryPath = path.join(directory, entry.name);
+        if (entry.isDirectory()) {
+          pending.push(entryPath);
+        } else if (entry.isFile()) {
+          const relative = path.relative(this.root, entryPath).split(path.sep).join('/');
+          if (include(relative)) files.push(relative);
+        }
+      }
     }
     return files.sort();
   }
