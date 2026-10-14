@@ -1003,12 +1003,7 @@ impl<'d> Builder<'d> {
     /// Returns the union of `members`, which must be different, with
     /// `discriminator`, which is `exclusive` if a value is at most one of
     /// them.
-    fn push_union(
-        &mut self,
-        members: &[TypeId],
-        discriminator: Option<Box<DiscriminatorData>>,
-        exclusive: bool,
-    ) -> TypeId {
+    fn push_union(&mut self, members: &[TypeId], discriminator: Option<DiscriminatorData>, exclusive: bool) -> TypeId {
         let members = self.members.extend(members.iter().copied());
         self.push(TypeData::Union(UnionData {
             members,
@@ -1752,7 +1747,7 @@ impl<'d> Builder<'d> {
     fn union_of(
         &mut self,
         members: &[TypeId],
-        discriminator: Option<Box<DiscriminatorData>>,
+        discriminator: Option<DiscriminatorData>,
         mut exclusive: bool,
     ) -> TypeId {
         let mut out = Vec::with_capacity(members.len());
@@ -1821,11 +1816,7 @@ impl<'d> Builder<'d> {
 
     /// Returns the discriminator of a union of `members`, each with its
     /// schema.
-    fn discriminator(
-        &mut self,
-        discriminator: &'d Discriminator,
-        members: &[(Schema, TypeId)],
-    ) -> Box<DiscriminatorData> {
+    fn discriminator(&mut self, discriminator: &'d Discriminator, members: &[(Schema, TypeId)]) -> DiscriminatorData {
         let doc = self.doc;
         let wire_name = doc.str(discriminator.property_name);
         let mut name = Name::new(wire_name);
@@ -1875,12 +1866,12 @@ impl<'d> Builder<'d> {
             }
         }
         let wire_name = self.strings.push(wire_name);
-        Box::new(DiscriminatorData {
+        DiscriminatorData {
             wire_name,
             name,
             cases,
             default,
-        })
+        }
     }
 
     /// Returns the type a discriminator's mapping names: a `$ref`, or the
@@ -1956,7 +1947,7 @@ impl<'d> Builder<'d> {
         };
         let object = doc.get(object);
         let has_ref = !object.reference.is_empty();
-        if !object.description.is_empty() && !(has_ref && self.v30) {
+        if !(object.description.is_empty() || has_ref && self.v30) {
             return doc.str(object.description);
         }
         if has_ref {
