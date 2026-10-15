@@ -70,6 +70,31 @@ test('validates and exposes every known operation-level Forge field', () => {
   assert.equal(forge?.params?.widget_id && typeof forge.params.widget_id, 'object');
 });
 
+test('documentation renders canonical operations and ordinary aliases alongside mapped projections', () => {
+  const source = operation({
+    'x-forge-aliases': [
+      {
+        'x-fern-sdk-group-name': 'widgets.items',
+        'x-fern-sdk-method-name': 'patch',
+      },
+      {
+        'x-fern-sdk-group-name': 'widgets.labels',
+        'x-fern-sdk-method-name': 'put',
+        'x-fern-audiences': ['example-cli'],
+        description: 'Set a widget label.',
+        'x-forge-request-transform': { arguments: [], requestBody: { object: [] } },
+      },
+    ],
+  });
+  const model = buildDocsModel({ source, products: [product], extensions: [forgeExtension()] });
+  assert.deepEqual(
+    model.products[0]?.sections[0]?.operations
+      .map((entry) => getOperationExtensionData(entry, 'forge')?.sdkMethodName)
+      .sort(),
+    ['patch', 'update'],
+  );
+});
+
 test('aliases participate in product discovery and retain projection-specific data', () => {
   const source = operation({
     'x-fern-sdk-group-name': undefined,

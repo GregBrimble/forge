@@ -340,3 +340,12 @@ fn model_used_by_aliases_in_one_group_is_in_that_group() {
 
     assert_eq!(model(&forge, "M").group(), Some(group(&forge, "a")));
 }
+
+#[test]
+fn alias_description_overrides_the_operation_description() {
+    let forge = parse(&aliased(
+        r#"[{"x-fern-sdk-group-name":"a","x-fern-sdk-method-name":"pause","description":"Pause processing."}]"#,
+        "",
+    ));
+    assert_eq!(method(&forge, "a.pause").description(), "Pause processing.");
+}

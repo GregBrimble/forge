@@ -240,6 +240,8 @@ pub(super) struct Operation {
 /// `x-forge-aliases`, a method.
 #[derive(Default)]
 pub(super) struct Definition {
+    /// An alias description overriding the operation description.
+    pub(super) description: Option<Str>,
     /// The `x-fern-sdk-method-name`, or empty for none.
     pub(super) method_name: Str,
     /// The `x-fern-sdk-group-name`: the group path, top level first, or
@@ -1219,10 +1221,8 @@ impl Definition {
     }
 }
 
-/// Reads an alias in `x-forge-aliases`: an object of the keys of a
-/// definition and other extensions. Its keys that are not extensions are
-/// skipped, and so is an `x-forge-aliases` in it, since aliases do not
-/// nest.
+/// Reads an alias in `x-forge-aliases`: definition keys, an optional
+/// description, and other extensions. Other fields and nested aliases are skipped.
 struct Alias;
 
 impl ReadObject for Alias {
@@ -1239,6 +1239,12 @@ impl ReadObject for Alias {
                 AliasField::Definition(key) => {
                     key.once(&mut seen)?;
                     definition.read_value(doc, &mut map, key)?;
+                }
+                AliasField::Description => {
+                    if definition.description.is_some() {
+                        return Err(de::Error::duplicate_field("description"));
+                    }
+                    definition.description = Some(map.next_value_seed(seed::<ReadStr>(doc))?);
                 }
                 AliasField::Extension(name) => json::insert(&mut extensions, name, map.next_value()?),
                 AliasField::Other => skip(&mut map)?,
@@ -1342,10 +1348,10 @@ impl<'de> Visitor<'de> for MaybeAlias<'_> {
     }
 }
 
-/// A key of an alias: one of a definition, an extension that is not read,
-/// which is kept by its name, or any other key, which is skipped, as
-/// [`Alias`] says.
+/// A key of an alias: a description, a definition key, a preserved
+/// extension, or a skipped field, as [`Alias`] says.
 enum AliasField {
+    Description,
     Definition(DefinitionKey),
     Extension(String),
     Other,
@@ -1363,6 +1369,9 @@ impl<'de> Deserialize<'de> for AliasField {
             }
 
             fn visit_str<E: de::Error>(self, v: &str) -> Result<AliasField, E> {
+                if v == "description" {
+                    return Ok(AliasField::Description);
+                }
                 Ok(match DefinitionKey::from_key(v) {
                     DefinitionKey::Other if !v.starts_with("x-") => AliasField::Other,
                     DefinitionKey::Other => match OperationKey::from_key(v) {

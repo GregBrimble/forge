@@ -35,7 +35,15 @@
       "default": "./plugin/ts.js"
     },
     "./plugin/forge.wit": "./plugin/forge.wit",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./request-transform": {
+      "types": "./plugin/request-transform.d.ts",
+      "default": "./plugin/request-transform.js"
+    },
+    "./audiences": {
+      "types": "./plugin/audiences.d.ts",
+      "default": "./plugin/audiences.js"
+    }
   },
   "publishConfig": {
     "access": "public"

@@ -236,7 +236,8 @@ impl std::fmt::Debug for Group<'_> {
 /// with `x-fern-ignore`. None of these come from the operation: an alias
 /// without an extension does not have the operation's. The rest, from the
 /// HTTP method and path to the responses, is the operation's, and every
-/// alias has it. Each alias is a method of its own group, so a model one
+/// alias has it. An alias can override the operation description with its own
+/// `description`. Each alias is a method of its own group, so a model one
 /// uses is placed as though each alias were a separate operation.
 ///
 /// Like a [`Group`], a `Method` is a cheap reference into its `Forge`. Two

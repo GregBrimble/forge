@@ -680,7 +680,9 @@ impl<'d> Builder<'d> {
             http_method,
             path: self.strings.push(path),
             summary: self.strings.push(doc.str(operation.summary)),
-            description: self.strings.push(doc.str(operation.description)),
+            description: self
+                .strings
+                .push(doc.str(definition.description.unwrap_or(operation.description))),
             deprecated: operation.deprecated,
             availability,
             hidden: definition.hidden,

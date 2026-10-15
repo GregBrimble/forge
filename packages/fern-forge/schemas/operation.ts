@@ -56,6 +56,7 @@ const sdkGroupSchema = z.union([
 
 /** Forge validation for Fern headers, which generic astro-fern intentionally leaves extension-owned. */
 export const operationProjectionFieldsSchema = z.object({
+  'x-fern-audiences': z.union([nonEmptyStringSchema, z.array(nonEmptyStringSchema)]).optional(),
   'x-fern-sdk-group-name': sdkGroupSchema,
   'x-fern-sdk-method-name': nonEmptyStringSchema,
   'x-fern-availability': forgeAvailabilitySchema.optional(),
@@ -66,6 +67,13 @@ export const operationProjectionFieldsSchema = z.object({
   'x-forge-args': z.array(methodArgumentSchema).optional(),
   'x-forge-params': z.record(z.string(), paramOverrideSchema).optional(),
   'x-forge-require-confirmation': nonEmptyStringSchema.optional(),
+  'x-forge-request-transform': z
+    .object({
+      arguments: z.array(z.record(z.string(), z.unknown())),
+      requestBody: z.record(z.string(), z.unknown()),
+    })
+    .strict()
+    .optional(),
 });
 
 const knownOperationForgeKeys = new Set([...operationProjectionFieldsSchema.keyof().options, 'x-forge-aliases']);
@@ -111,7 +119,8 @@ export function rejectUnknownForgeKeys(
 }
 
 export function projectionSchema(strict: boolean) {
-  const schema = strict ? operationProjectionFieldsSchema.strict() : operationProjectionFieldsSchema.loose();
+  const fields = operationProjectionFieldsSchema.extend({ description: z.string().optional() });
+  const schema = strict ? fields.strict() : fields.loose();
   return schema.superRefine((value, context) => {
     rejectUnknownForgeKeys(value, knownOperationForgeKeys, context);
   });

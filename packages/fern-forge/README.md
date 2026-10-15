@@ -393,6 +393,10 @@ Unknown root `x-forge-*` names fail document validation.
 
 ## Handle validation errors
 
+Request-mapped `x-forge-aliases` are validated as metadata and omitted from the
+rendered operation variants. Documentation continues to render the canonical API
+operation and ordinary aliases.
+
 `forgeExtension()` validates root metadata before validating supported HTTP
 methods under `paths`. Root errors stop operation validation. Operation errors
 are collected into one error so a content run reports every affected operation.

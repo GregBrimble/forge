@@ -17,5 +17,5 @@
     "outDir": "plugin",
     "newLine": "lf"
   },
-  "include": ["src/index.ts", "src/ts.ts", "src/wit/**/*.d.ts"]
+  "include": ["src/index.ts", "src/ts.ts", "src/request-transform.ts", "src/audiences.ts", "src/wit/**/*.d.ts"]
 }

@@ -251,6 +251,77 @@ A plugin is a component of the `plugin` world in the WIT that
 works: in Rust, `wit_bindgen::generate!` and
 `cargo build --target wasm32-wasip2`.
 
+## Request transforms and audiences
+
+An operation alias in `x-forge-aliases` can declare its own `x-fern-audiences`
+and an `x-forge-request-transform`. The transform describes arguments and the
+JSON body a supporting generator constructs from them:
+
+```yaml
+x-forge-aliases:
+  - x-fern-sdk-group-name: catalogue.labels
+    x-fern-sdk-method-name: remove
+    x-fern-audiences: [example-cli]
+    description: Remove a label from an entry.
+    x-forge-require-confirmation: This operation removes the label.
+    x-forge-request-transform:
+      arguments:
+        - name: name
+          type: string
+          required: true
+          positional: true
+      requestBody:
+        object:
+          - key: labels
+            value:
+              object:
+                - key: { arg: name }
+                  value: { literal: null }
+```
+
+Group descriptions use the document's `x-forge-commands`. Alias descriptions and
+confirmations use the ordinary operation fields. Transforms retain the source
+operation's HTTP path, parameters, and responses, and construct one JSON request
+on an operation accepting `application/json`.
+
+Select an audience before passing the document to the Forge binary:
+
+```ts
+import { selectAudience } from '@cloudflare/forge/audiences';
+
+selectAudience(source, 'example-cli');
+```
+
+The selector updates the document in place and returns the number of operations
+removed. Explicit alias audiences override the parent's; omission inherits them.
+An absent restriction includes every audience, and an empty list excludes every
+audience. A mapped alias can target a different audience from its parent. Mapped
+aliases supplement the primary operation when it matches the selected audience;
+ordinary aliases retain their replacement behavior.
+
+The core parser preserves `x-forge-request-transform` on each method. Generators
+interpret the extension or report an unsupported feature. The JavaScript helpers
+in `@cloudflare/forge/request-transform` also run in WebAssembly plugins:
+
+- `parseRequestTransform()` validates the mapping syntax and scalar arguments.
+- `validateRequestTransformArguments()` checks references, computed keys, unique
+  argument names, and unused inputs against a generator's final argument names.
+- `RequestTransform`, `RequestBodyTransform`, and `JsonValue` describe the mapping.
+
+Mapping nodes are `{ arg: 'name' }`, `{ literal: JSON }`, or
+`{ object: [{ key: 'field', value: NODE }] }`. Object keys can be
+`{ arg: 'name' }`; `omitIfUnset: 'name'` on an entry includes it only when that
+argument is set. Unset values are omitted; explicit nulls, arrays, and empty
+objects are preserved. Any node can be the root.
+
+Arguments have a `name`, a scalar `type` (`string`, `number`, or `boolean`), and
+optional `description`, `required`, `positional`, and `sensitive` fields.
+Sensitive arguments must be string options. Computed keys require nonsensitive,
+required string arguments. Consumers own prompts, redaction, confirmation, and
+reserved option checks. Validation does not yet check the generated body's
+shape against the OpenAPI schema; declarations must use the endpoint's wire
+fields and nullability.
+
 ## Platforms
 
 forge is a native binary, and this package carries one for each of:

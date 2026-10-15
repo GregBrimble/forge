@@ -47,7 +47,9 @@ function parseOperation(operation: OperationSchema): ParsedForgeOperation {
       ? []
       : aliasesEnvelopeSchema
           .parse(operation)
-          ['x-forge-aliases'].map((alias) => toOperationData(projectionSchema(true).parse(alias)));
+          ['x-forge-aliases'].map((alias) => projectionSchema(true).parse(alias))
+          .filter((alias) => alias['x-forge-request-transform'] === undefined)
+          .map(toOperationData);
   const aliasAddresses = new Set<string>();
   for (const alias of aliases) {
     const address = JSON.stringify([alias.sdkGroupName, alias.sdkMethodName]);
