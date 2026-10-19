@@ -57,7 +57,7 @@ fn scalar_type(scalar: Scalar) -> &'static str {
         Scalar::Unknown => "unknown",
         Scalar::Null => "null",
         Scalar::Boolean => "boolean",
-        Scalar::String => "string",
+        Scalar::String | Scalar::Uuid => "string",
         Scalar::Number(Number::Int64) => "bigint",
         Scalar::Number(_) => "number",
         Scalar::DateTime => "Temporal.Instant",
