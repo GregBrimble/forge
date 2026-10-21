@@ -1,0 +1,43 @@
+packages/forge/tsconfig.json
+  s_f5aa6e81b0b97a::t_e293fa15a41bf3 20
+packages/forge/src/openapi.ts
+  s_f5aa6e81b0b97a::t_c0eba8be01c359 1-119
+src/link.rs
+  s_f5aa6e81b0b97a::t_d3957b9f18d123 683-685
+src/link/openapi.rs
+  s_f5aa6e81b0b97a::t_c341e08aa0a2a0 243-244,1245-1250,1357,1375-1377
+tests/parse/aliases.rs
+  s_f5aa6e81b0b97a::t_fe3083599bfa20 343-351
+packages/forge/REQUEST_ALIASES.md
+  s_f5aa6e81b0b97a::t_54296cac9c750d 1-92
+src/lib.rs
+  s_f5aa6e81b0b97a::t_3e7bc9cbce6a52 239-240
+packages/forge/package.json
+  s_f5aa6e81b0b97a::t_58e846df3f2edb 38-46
+packages/fern-forge/parser.ts
+  s_f5aa6e81b0b97a::t_bb39846c8d6a99 24-26,52-54
+packages/forge/src/request-aliases.ts
+  s_f5aa6e81b0b97a::t_1fdebfef5f892a 1-179
+packages/fern-forge/schemas/operation.ts
+  s_f5aa6e81b0b97a::t_7956e8af194e5f 59-60,71-78
+packages/fern-forge/README.md
+  s_f5aa6e81b0b97a::t_415f810e93fa45 396-399
+packages/fern-forge/index.test.ts
+  s_f5aa6e81b0b97a::t_23d508801ac21b 73-97,100,117-118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "2e3bd62855f1a8fbce66811ca66dab152a00e7b5",
+  "prompts": {},
+  "sessions": {
+    "s_f5aa6e81b0b97a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fced-da7d-7cc1-94c6-cf05a8985ca2",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Greg Brimble <gbrimble@cloudflare.com>"
+    }
+  }
+}
